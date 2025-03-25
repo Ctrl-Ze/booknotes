@@ -64,7 +64,9 @@ Failures which are left unchecked can impact the system's availability - the % o
 `availability = uptime / total time.`
 
 Availability is often expressed in terms of nines:
+
 <img src="images/availability-nines.png">
+
 Three nines is considered acceptable for users, anything above four nines is considered highly available.
 
 There are various techniques one can use to increase availability. All of them try to mitigate failures when they inevitably come up - fault isolation, self-healing mechanism, redundancy, etc.
