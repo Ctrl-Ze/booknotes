@@ -95,3 +95,5 @@ This architectural pattern is known as <a href="http://wiki.c2.com/?PortsAndAdap
 
 This architectural style accomplishes a setup in which the business logic don't depend on the technical details. Instead, technical details depend on business logic - dependency inversion:
 <img src="images/ports-and-adapters.png">
+
+[Next Chapter](../part1/README.md)
