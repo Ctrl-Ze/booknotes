@@ -54,6 +54,7 @@ Received segments are stored in a buffer, while waiting for the process to read 
 <img src="images/tcp-receive-buffer.png">
 
 To receive buffer size is also communicated back to the sender when it acknowledges a segment. This way the sender avoids sending more data that can fit the buffer.
+
 <img src="images/ack-receive-buffer-size.png">
 
 ### Congestion Control
