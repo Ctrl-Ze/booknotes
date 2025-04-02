@@ -170,4 +170,96 @@ The property of a system to continue to function even when a dependency is down 
 
 ## APIs
 
+When a client makes a call to a server via their hostname + port, that calls through an adapter which maps the request to interface calls within the server, invoking its business logic.
+
+Communication can be direct or indirect:
+* Direct - both processes are up and running and communicate in real-time.
+* Indirect - communication is achieved via a broker. One process might be down and receive the message at a later time, asynchronously.
+
+This chapter focuses on direct communication especially on the request-response communication style.
+
+In this style, clients send messages to the server and the server responds back, similar to function calls in a codebase, but across process and network boundaries.
+
+The data format is language agnostic. The format specifies the (de)serialization speed, whether it's human-readable and how hard is to evolve over time.
+
+Popular data formats:
+* JSON - textual, human-readable format at the expense of larger data packets and parsing overhead.
+* Protocol buffers - binary, efficient format, which has smaller payloads than JSON, but is not human-readable.
+
+When a client sends a request to the server:
+* it can block and wait for response (synchronous).
+* run the request in a thread and invoke a callback when the response is received(asynchronous).
+
+For most use-cases, we favor asynchronous communication to avoid blocking the UI.
+
+Common IPC technologies for request-response interactions:
+* HTTP - slower but more adopted
+* gRPC - faster, but not supported by all browser
+
+Typically, server to server communication is implemented via gRPC, client to server is via HTTP.
+
+A popular set of design principles for designing elegant HTTP APIs is REST(Representational State Transfer).
+
+The principles include:
+* requests are stateless - each request contains all the necessary information required to process it.
+* responses are implicitly or explicitly labeled as cacheable, allowing clients to cache them for subsequent requests.
+
+### HTTP
+
+HTTP is a request-response protocol for client to server communication.
+
+<img src="images/http-request-response-example.png">
+
+In HTTP 1.1, a message is text-based with 3 parts:
+* Start line - In requests, indicates what the request is for, in responses, indicates if the request was successful or not
+* Headers - key-value pairs with metadata about the message
+* Body - container for data
+
+HTTP is a stateless protocol, hence, all client info needs to be specified within the requests. Servers treat requests as independent, unless there is extra data, indicating what client they're associated with.
+
+HTTP uses TCP for the reliability guarantees and TLS for the security ones. When using TLS, it is referred to as HTTPS.
+
+HTTP 1.1 keeps a connection to a server open between requests to avoid the TCP overhead of re-opening connections. However, it has a limitation that subsequent requests need to wait before the server sends a response back. This is troublesome when for example we load a dozen of images on a page - something which can be done in parallel.
+
+Browsers typically work around this by making multiple connections to the server for fetching independent resources. The price for this workaround is using more memory and sockets.
+
+HTTP 2 was designed to address the limitations of HTTP 1.1 - it uses a binary protocol vs. a textual one. This allows multiplexing multiple concurrent requests-response transactions on the same connection. In early 2020, half of the most visited websites used HTTP 2.
+
+HTTP 3, a package loss only blocks the affected stream, not all of them.
+
+### Resources
+
+Example: a server application we're building - product catalog management for an e-commerce site. Customers can browse the catalog, administrators can create, update or delete products.
+
+We'll build this via an HTTP API. HTTP APIs host resources, which can be physical (ex: image) or abstract (ex: product) entities on which we can execute create/read/update/delete (CRUD) operations.
+
+A URL identifies a resource by describing its location on the server, ex: `https://www.example.com/products?sort=price`:
+* `http` is the protocol
+* `www.example.com` is the hostname
+* `products` is the name of the resource
+* `?sort=price` is the query string, which contains additional parameters about how to fetch the results.
+
+A URL can also model relationships between resources, ex:
+* `/products/42` - the product with ID 42
+* `/products/42/reviews` - the reviews of product with ID 42
+
+We also need to deal with how the resource data is serialized. That is specified by the client via the `Content-type` header, most popular one being `application/json`.
+
+Example JSON-serialized product:
+```json
+   {
+      "name": "John Doe",
+      "age": 30,
+      "city": "New York"  
+   }
+```
+
+### Request methods
+
+### OpenAPI
+
+### Evolution
+
+### Idempotency
+
 [Next Chapter](../part2/README.md)
