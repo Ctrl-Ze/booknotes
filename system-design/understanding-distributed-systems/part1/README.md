@@ -139,6 +139,34 @@ The bottom line, though, is that instantiating a TLS connection is not free. Hen
 
 The handshake typically requires 2 round trips with TLS 1.2 and 1 with TLS 1.3.
 ## Discovery
+How do we find out what's the IP address of the server we want to connect to?
+
+DNS(Domain Name System) to the rescue - distributed, hierarchical, eventually consistent key-value store of hostname -> ip address
+
+How does it work?
+
+<img src="images/dns-resolution-process.png">
+
+1. You enter www.example.com into your browser.
+2. If the hostname you're looking for is in the browser's cache, it returns it.
+3. Otherwise, the lookup request is routed to the DNS resolver - a server, maintained by your internet service provider(ISP).
+4. The DNS resolver checks its cache and returns the address if found.
+5. If not, lookup request us routed to the root name server (root NS).
+6. Root NS maps top-level domain(TLD), eg `.com`, to the NS server responsible for it.
+7. DNS resolver send request to TLD NS server `example.com`. NS Server returns the authoritative NS server for `example.com`.
+8. DNS resolver sends request to the `example.com`. NS server which returns the IP address for `www.example.com`.
+
+In reality, a lot of caching is involved at each step, enabling us to avoid all the round trips, as domain names rarely change. Caches refresh the domain names based on a time-to-live value (TTL) which every domain name has.
+
+Specifying the TTL is a trade-off:
+* if it's too big, and you make a domain name change, some clients will take longer to update.
+* if it's to small and average request time will increase
+
+The original DNS protocol sent plain-text messages over UDP for efficiency, but nowadays <a href="https://en.wikipedia.org/wiki/DNS_over_TLS">DNS over TLS (using TCP)</a> is used for security purposes. 
+
+One interesting observation is that a DNS name server can be a single point of failure and lead to outages. A smart migration is to let resolvers serve stale entries vs returning an error in case the name server is down.
+
+The property of a system to continue to function even when a dependency is down is referred to as "static stability".
 
 ## APIs
 
