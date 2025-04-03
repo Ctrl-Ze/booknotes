@@ -256,10 +256,138 @@ Example JSON-serialized product:
 
 ### Request methods
 
+URLs designate what resource you're targeting. HTTP methods define what operation you're performing on the resource.
+
+Most commonly used operations with example `product` entity:
+* `POST /products` - Create new product
+* `GET /products` - List all products. Usually includes query parameters to apply filters on the result set.
+* `GET /products/42` - Get a particular product
+* `PUT /products/42` - Update a product
+* `DELETE /products/42` - Delete a product
+
+Request methods are categorized based on whether they are safe and idempotent:
+* Safe - don't have visible side effects, hence, can safely be cached
+* Idempotent - can be executed multiple times and the end result should be the same as if it was executed once. The property is crucial for APIs (covered later)
+
+| Methods | Safe | Idempotent |
+|---------|------|------------|
+| POST    | NO   | NO         |
+| GET     | Yes  | Yes        |
+| PUT     | NO   | Yes        |
+| GET     | NO   | Yes        |
+
+### Response status codes
+
+Responses contain a status code, which indicates whether the request is successful or not:
+
+* 200-299 - indicate success, ex 200 OK
+* 300-399 - used for redirection, ex 301 Moved Permanently indicates the resource is moved to a different URL. The new URL is specified in the `Location` header.
+* 400-499 - client errors
+  * 400 Bad Request - when ex input format is wrong
+  * 401 Unauthorized - when ex password on login is wrong
+  * 403 Forbidden - when ex you don't have access to resource
+  * 404 Not Found - when ex the specified resource doesn't exist
+* 500-599 - server errors, when ex the database is down & you can't process the request. These requests can typically be retried.
+  * 500 Internal Server Error - server encountered unexpected error, due to which request can't be handled
+  * 502 Bad Gateway - server, while acting as proxy, received a downstream server error
+  * 503 Service Unavailable - server is unavailable due to ex a temporary heavy load on it.
+
 ### OpenAPI
+
+The server's API can be defined via an Interface Definition Language (IDL) - a language-agnostic format, which specifies what the API contains.
+
+This can be used for generating the server's adapter and the client's library for interacting with the server.
+
+The OpenAPI specification evolved from the Swagger project, and it's the most popular IDL for RESTful APIs. It can formally describe an API via YAML format including available endpoints, supported request methods, status codes, schema of the entities.
+
+Example of OpenAPI definition:
+
+```yaml
+openapi: 3.0.0
+info:
+   version: "1.0.0"
+   title: Catalog Service API
+
+paths:
+   /products:
+      get:
+         summary: List products
+         parameters:
+            - in: query
+              name: sort
+              required: false
+              schema:
+                 type: string
+         responses:
+            "200":
+               description: list of products in catalog
+               content:
+                  application/json:
+                     schema:
+                        type: array
+                        items:
+                           $ref: "#/components/schemas/ProductItem"
+            "400":
+               description: bad input
+
+components:
+   schemas:
+      ProductItem:
+         type: object
+         required:
+            - id
+            - name
+            - category
+         properties:
+            id:
+               type: number
+            name:
+               type: string
+            category:
+               type: string
+```
+
+This can be used to generate an API's documentation, boilerplate adapters and client SDKs.
 
 ### Evolution
 
+An API starts out as a well-designed interface, but it would eventually need to change due to change in requirements.
+
+The last thing we need is to change the API and introduce a breaking change. This means that existing client software will stop working properly with the API after the change. Hence, we'll need to modify every single client of the API. Some of them, we might not have access to.
+
+There are two types of breaking changes:
+* at the endpoint level - ex: changing `/products` to `/new-products` or making an optional query parameter required.
+* at the schema level - ex: changing the type of the `category` property from `string` to `int`.
+
+To tackle this, REST APIs should be versioned (ex `/v1/products`). As a general rule of the thumb, though, REST APIs should evolve in a backwards compatible manner.
+
+Backwards compatible APIs are usually not elegant, but they're practical.
+
 ### Idempotency
+
+If an API request times out without knowing the result, a sensible way to tackle this on the client side is to retry the request(one or more times).
+
+Idempotent HTTP requests are susceptible to this technique as executing multiple identical requests yields the same result as executing it once.
+
+Non-idempotent requests, on the other hand, can't be retried so easily, because they can result in a bad state such as for ex: creating the same product twice. To mitigate this, some effort can be done on the server-side to make POST requests idempotent. 
+
+A technique to achieve this is to associate a request with an idempotency key. A key used to detect if this request has already been executed. This can be achieved by having an `Idempotency-Key` header which is a UUID, generated by the client. When a server received such a key, it first checks if there is such a key in the DB. If not, execute the request. If there is one, return the already executed response. These keys can be cleaned up from the database after a while. In other words, they can have a TTL.
+
+One consideration when executing this is to make the act of
+1. storing the idempotency key
+2. executing the request as an atomic operation
+
+Otherwise, the server can crash right after storing the idempotency key. Hence, after restart, server thinks that product is already created, but is not. 
+
+This is easy to achieve if we're using an ACID database, which has transaction guarantees. It is a lot more challenging if we need to also change the state of an external system during transaction.
+
+An interesting edge-case:
+* Client A attempts to create a resource, request fails but resource is created
+* Client B deletes the resource
+* Client A attempts to create the resource again
+
+What should the response be? - <a href="https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/">less surprising behaviour</a> is to return success.
+
+In summary, idempotent APIs enable more robust clients, since they can always retry failures without worrying about consequences.
 
 [Next Chapter](../part2/README.md)
