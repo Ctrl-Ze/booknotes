@@ -47,6 +47,7 @@ For the type of applications covered in the book, load is measured in:
 * Response time - time elapsed in seconds between sending a request and receiving a response.
 
 When the application reaches a certain threshold in terms of load, throughput starts degrading:
+
 <img src="images/app-capacity.png">
 
 The capacity depends on a system's architecture, implementation, physical limitations (ex CPU, Memory, etc).
