@@ -99,6 +99,8 @@ Like the foundation myths about Romulus,the Aeneas myth has a long history in bo
 
 ## The rise of the international aristocracy: Italy and the orientalising revolution
 
+From around the 8th–6th century BCE, Italy experienced an “Orientalising Revolution”—influence from the eastern Mediterranean (e.g., Etruscan and Greek world). The 7th century was a period of rapid social and economic change throughout Italy. It was marked by increasing urbanization in many regions, and by the rise of an increasingly wealthy elite which displayed its power and status through conspicuous consumption. Local aristocratic families adopted new foreign luxuries, artistic styles, and trade practices, transforming their identity from clan-based elites to internationally connected nobility. During the early part of the century this can be traced by the increasingly rich burials, but by the end of the 7th century priorities had started to change, and self-advertisement and competition for status were beginning to be expressed in different ways. The construction of large houses, impressive new religious buildings and early types of public building demonstrate that the elites of Italy were beginning to invest in their communities as a form of self-promotion.
+
 ## Orientalising Rome and the early kings
 
 
