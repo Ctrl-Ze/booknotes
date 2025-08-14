@@ -249,7 +249,6 @@ Data replication is fundamental for distributed system. One reason for doing tha
 The challenge of replication is to keep them consistent with one another in the event of failure. The chapter will explore Raft's replication algorithm which provides the strongest consistency guarantee - to clients, the data appears to be stored on a single process.
 
 Parox is a more popular protocol, but we're exploring Raft as it's simpler to understand. Raft is based on state machine replication - leader emits events for state change and all followers update their state when the event is received. As long as the followers execute the same sequence of operations as the leader, they will end up with the same state. Unfortunately, just broadcasting the event is not sufficient in the event of failures(Ex: network outages).
-
 Example of state-machine replication with a distributed key-value store:
 * KV store accepts operations `put(k,v)` and `get(k)`
 * State is stored in a dictionary
